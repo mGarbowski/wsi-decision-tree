@@ -1,5 +1,8 @@
 import random
 
+RowAttributes = tuple[str, ...]
+Label = str
+
 
 class Dataset:
     """Represents a dataset
@@ -10,34 +13,34 @@ class Dataset:
 
     attributes and classes are of equal length
     """
-    _attributes: list[tuple[str, ...]]
-    _classes: list[str]
+    _attributes: list[RowAttributes]
+    _labels: list[Label]
 
-    def __init__(self, attributes: list[tuple[str, ...]] = None, classes: list[str] = None):
-        if attributes is None and classes is None:
+    def __init__(self, attributes: list[RowAttributes] = None, labels: list[Label] = None):
+        if attributes is None and labels is None:
             self._attributes = []
-            self._classes = []
+            self._labels = []
             return
 
-        if len(attributes) != len(classes):
-            raise ValueError("Attributes and classes must have equal length")
+        if len(attributes) != len(labels):
+            raise ValueError("Attributes and labels must have equal length")
 
         self._attributes = attributes if attributes is not None else []
-        self._classes = classes if classes is not None else []
+        self._labels = labels if labels is not None else []
 
     def __eq__(self, other: 'Dataset') -> bool:
-        return self.attributes == other.attributes and self.classes == other.classes
+        return self.attributes == other.attributes and self.labels == other.labels
 
-    def __getitem__(self, index: int) -> tuple[tuple[str, ...], str]:
-        return self._attributes[index], self._classes[index]
+    def __getitem__(self, index: int) -> tuple[RowAttributes, Label]:
+        return self._attributes[index], self._labels[index]
 
     @property
-    def attributes(self) -> list[tuple[str, ...]]:
+    def attributes(self) -> list[RowAttributes]:
         return self._attributes
 
     @property
-    def classes(self) -> list[str]:
-        return self._classes
+    def labels(self) -> list[Label]:
+        return self._labels
 
     def is_empty(self) -> bool:
         return len(self._attributes) == 0
@@ -45,17 +48,17 @@ class Dataset:
     def size(self):
         return len(self._attributes)
 
-    def add_row(self, row_attributes: tuple[str, ...], row_class: str):
+    def add_row(self, row_attributes: RowAttributes, row_label: Label):
         self._attributes.append(row_attributes)
-        self._classes.append(row_class)
+        self._labels.append(row_label)
 
     def split_by_attribute(self, attribute_idx: int) -> list['Dataset']:
         unique_attribute_values = set(data_point[attribute_idx] for data_point in self._attributes)
         new_datasets = {attr_value: Dataset() for attr_value in unique_attribute_values}
 
-        for row_attributes, row_class in zip(self._attributes, self._classes):
+        for row_attributes, row_label in zip(self._attributes, self._labels):
             split_attribute = row_attributes[attribute_idx]
-            new_datasets[split_attribute].add_row(row_attributes, row_class)
+            new_datasets[split_attribute].add_row(row_attributes, row_label)
 
         return list(new_datasets.values())
 
@@ -85,12 +88,12 @@ class Dataset:
         with open(file_path, mode="rt", encoding="utf-8") as file:
             lines = file.readlines()
             attributes = []
-            classes = []
+            labels = []
             for line in lines:
                 values = line.strip().split(",")
                 label = values.pop(label_col_idx)
                 attrs = tuple(values)
                 attributes.append(attrs)
-                classes.append(label)
+                labels.append(label)
 
-            return cls(attributes, classes)
+            return cls(attributes, labels)

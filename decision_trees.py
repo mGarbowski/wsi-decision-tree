@@ -2,17 +2,17 @@ import math
 from dataclasses import dataclass
 from typing import TypeVar
 
-from dataset import Dataset
+from dataset import Dataset, RowAttributes, Label
 
 T = TypeVar('T')
 
 
 def entropy(dataset: Dataset) -> float:
-    unique_classes = set(dataset.classes)
+    unique_labels = set(dataset.labels)
     entropy_value = 0
-    for unique_class in unique_classes:
-        class_frequency = dataset.classes.count(unique_class) / dataset.size()
-        entropy_value -= class_frequency * math.log(class_frequency, 2)
+    for unique_label in unique_labels:
+        label_frequency = dataset.labels.count(unique_label) / dataset.size()
+        entropy_value -= label_frequency * math.log(label_frequency, 2)
 
     return entropy_value
 
@@ -78,7 +78,7 @@ class DecisionTreeClassifier:
         root = build_decision_tree(dataset, attribute_idxs)
         return cls(root)
 
-    def predict_single(self, row_attributes: tuple[str, ...]) -> str:
+    def predict_single(self, row_attributes: RowAttributes) -> Label:
         """Predict label based on attributes"""
         node = self._root
         while not node.is_leaf():
@@ -87,13 +87,13 @@ class DecisionTreeClassifier:
 
         return node.label
 
-    def predict(self, attributes: list[tuple[str, ...]]) -> list[str]:
+    def predict(self, attributes: list[RowAttributes]) -> list[Label]:
         """Predict label based on attributes for each row"""
         return [self.predict_single(row_attributes) for row_attributes in attributes]
 
     def evaluate(self, test_set: Dataset) -> float:
         """Ratio of correct predictions to all predictions"""
-        actual = test_set.classes
+        actual = test_set.labels
         predicted = self.predict(test_set.attributes)
         correct_predictions = 0
         for a, p in zip(actual, predicted):
@@ -111,11 +111,11 @@ def build_decision_tree(
         raise ValueError("Training set cannot be empty")
 
     _, final_label = training_set[0]
-    if all(label == final_label for label in training_set.classes):
+    if all(label == final_label for label in training_set.labels):
         return Node.leaf(final_label)
 
     if len(unused_attribute_idxs) == 0:
-        most_common_label = most_common_element(training_set.classes)
+        most_common_label = most_common_element(training_set.labels)
         return Node.leaf(most_common_label)
 
     split_attribute_idx = best_split_idx(training_set, unused_attribute_idxs)
