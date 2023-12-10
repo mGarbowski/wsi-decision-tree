@@ -1,4 +1,4 @@
-from decision_trees import Dataset, entropy
+from decision_trees import Dataset, entropy, most_common_element
 
 
 def test_zero_entropy():
@@ -45,3 +45,8 @@ def test_split_dataset():
     assert expected_1 in after_split
     assert expected_5 in after_split
     assert expected_6 in after_split
+
+
+def test_most_common_element():
+    elements = [1, 6, 4, 2, 6, 1, 2, 2]
+    assert most_common_element(elements) == 2
