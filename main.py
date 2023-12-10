@@ -51,27 +51,10 @@ def main():
         negative_label="p"
     )
 
-    print("\n")
-
     evaluate_on_dataset(
         "data/breast+cancer/breast-cancer.data",
         positive_label="no-recurrence-events",
         negative_label="recurrence-events",
-        split_ratio=0.2
-    )
-
-    evaluate_on_dataset(
-        "data/breast+cancer/breast-cancer.data",
-        positive_label="no-recurrence-events",
-        negative_label="recurrence-events",
-        split_ratio=0.4
-    )
-
-    evaluate_on_dataset(
-        "data/breast+cancer/breast-cancer.data",
-        positive_label="no-recurrence-events",
-        negative_label="recurrence-events",
-        split_ratio=0.6
     )
 
 
