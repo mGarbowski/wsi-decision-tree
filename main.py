@@ -2,27 +2,23 @@ from dataset import Dataset
 from decision_trees import DecisionTreeClassifier
 
 
-def evaluate_on_mushroom_dataset():
-    dataset = Dataset.load_from_file("data/mushroom/agaricus-lepiota.data")
-    train_set, test_set = dataset.train_test_split(0.6)
-    model = DecisionTreeClassifier.train(train_set)
-    accuracy = model.evaluate(test_set)
+def evaluate_on_dataset(file_path: str, n_times: int = 25):
+    dataset = Dataset.load_from_file(file_path)
+    accuracies = []
+    for _ in range(n_times):
+        train_set, test_set = dataset.train_test_split(0.6)
+        model = DecisionTreeClassifier.train(train_set)
+        accuracy = model.evaluate(test_set)
+        accuracies.append(accuracy)
 
-    print(f"Accuracy on mushroom dataset is {accuracy * 100:.2f}%")
+    avg_accuracy = sum(accuracies) / len(accuracies)
 
-
-def evaluate_on_breast_cancer_dataset():
-    dataset = Dataset.load_from_file("data/breast+cancer/breast-cancer.data")
-    train_set, test_set = dataset.train_test_split(0.6)
-    model = DecisionTreeClassifier.train(train_set)
-    accuracy = model.evaluate(test_set)
-
-    print(f"accuracy on breast cancer dataset is {accuracy * 100:.2f}%")
+    print(f"Average accuracy over {n_times} runs on {file_path} dataset is {avg_accuracy * 100:.2f}%")
 
 
 def main():
-    evaluate_on_mushroom_dataset()
-    evaluate_on_breast_cancer_dataset()
+    evaluate_on_dataset("data/mushroom/agaricus-lepiota.data")
+    evaluate_on_dataset("data/breast+cancer/breast-cancer.data")
 
 
 if __name__ == '__main__':
