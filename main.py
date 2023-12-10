@@ -6,13 +6,19 @@ def avg(values: list) -> float:
     return sum(values) / len(values)
 
 
-def evaluate_on_dataset(file_path: str, positive_label: str, negative_label: str, n_times: int = 25):
+def evaluate_on_dataset(
+        file_path: str,
+        positive_label: str,
+        negative_label: str,
+        split_ratio: float = 0.6,
+        n_times: int = 25
+):
     dataset = Dataset.load_from_file(file_path)
     evaluations = []
     n_test_set_samples = 0
     for _ in range(n_times):
-        train_set, test_set = dataset.train_test_split(0.6)
-        n_test_set_samples = len(train_set.attributes)
+        train_set, test_set = dataset.train_test_split(split_ratio)
+        n_test_set_samples = len(test_set.attributes)
         model = DecisionTreeClassifier.train(train_set)
         evaluation = model.evaluate(test_set, positive_label, negative_label)
         evaluations.append(evaluation)
@@ -31,8 +37,8 @@ def evaluate_on_dataset(file_path: str, positive_label: str, negative_label: str
     print(f"Number of samples in test set: {n_test_set_samples}")
     print(f"Accuracy:    {avg(accuracies) * 100:.2f}%")
     print(f"Precision:   {avg(precisions) * 100:.2f}%")
-    print(f"Recall:      {avg(recalls)*100:.2f}%")
-    print(f"Specificity: {avg(specificities)*100:.2f}%")
+    print(f"Recall:      {avg(recalls) * 100:.2f}%")
+    print(f"Specificity: {avg(specificities) * 100:.2f}%")
     print("")
     print(f"TP={avg(tp):<6.0f} FN={avg(fn):<6.0f}")
     print(f"FP={avg(fp):<6.0f} TN={avg(tn):<6.0f}")
@@ -50,7 +56,22 @@ def main():
     evaluate_on_dataset(
         "data/breast+cancer/breast-cancer.data",
         positive_label="no-recurrence-events",
-        negative_label="recurrence-events"
+        negative_label="recurrence-events",
+        split_ratio=0.2
+    )
+
+    evaluate_on_dataset(
+        "data/breast+cancer/breast-cancer.data",
+        positive_label="no-recurrence-events",
+        negative_label="recurrence-events",
+        split_ratio=0.4
+    )
+
+    evaluate_on_dataset(
+        "data/breast+cancer/breast-cancer.data",
+        positive_label="no-recurrence-events",
+        negative_label="recurrence-events",
+        split_ratio=0.6
     )
 
 
