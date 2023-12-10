@@ -80,4 +80,19 @@ def entropy(dataset: Dataset) -> float:
 
 
 def entropy_after_split(dataset: Dataset, split_attribute_idx: int) -> float:
-    pass
+    return sum(
+        partitioned_dataset.size() / dataset.size() * entropy(partitioned_dataset)
+        for partitioned_dataset
+        in dataset.split_by_attribute(split_attribute_idx)
+    )
+
+
+def information_gain(dataset: Dataset, split_attribute_idx: int) -> float:
+    return entropy(dataset) - entropy_after_split(dataset, split_attribute_idx)
+
+
+def best_split_idx(dataset: Dataset, unused_attribute_idxs: set[int]) -> int:
+    return max(
+        unused_attribute_idxs,
+        key=lambda idx: information_gain(dataset, idx)
+    )
