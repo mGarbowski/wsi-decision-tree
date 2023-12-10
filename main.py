@@ -7,13 +7,13 @@ def avg(values: list) -> float:
 
 
 def evaluate_on_dataset(
-        file_path: str,
+        dataset: Dataset,
+        name: str,
         positive_label: str,
         negative_label: str,
         split_ratio: float = 0.6,
         n_times: int = 25
 ):
-    dataset = Dataset.load_from_file(file_path)
     evaluations = []
     n_test_set_samples = 0
     for _ in range(n_times):
@@ -33,7 +33,7 @@ def evaluate_on_dataset(
     fp = [evaluation.false_positives for evaluation in evaluations]
     fn = [evaluation.false_negatives for evaluation in evaluations]
 
-    print(f"Average values over {n_times} runs on {file_path} dataset")
+    print(f"Average values over {n_times} runs on {name} dataset")
     print(f"Number of samples in test set: {n_test_set_samples}")
     print(f"Accuracy:    {avg(accuracies) * 100:.2f}%")
     print(f"Precision:   {avg(precisions) * 100:.2f}%")
@@ -44,17 +44,48 @@ def evaluate_on_dataset(
     print(f"FP={avg(fp):<6.0f} TN={avg(tn):<6.0f}")
 
 
+def remove_missing_values(dataset: Dataset, empty_symbol: str) -> Dataset:
+    new_dataset = Dataset()
+    for idx in range(dataset.size()):
+        attrs, label = dataset[idx]
+        if empty_symbol not in attrs:
+            new_dataset.add_row(attrs, label)
+
+    return new_dataset
+
+
 def main():
+    mushroom = Dataset.load_from_file("data/mushroom/agaricus-lepiota.data")
+    breast_cancer = Dataset.load_from_file("data/breast+cancer/breast-cancer.data")
+    breast_cancer_no_missing_values = remove_missing_values(breast_cancer, "?")
+
     evaluate_on_dataset(
-        "data/mushroom/agaricus-lepiota.data",
+        mushroom,
+        "mushroom",
         positive_label="e",
         negative_label="p"
     )
 
     evaluate_on_dataset(
-        "data/breast+cancer/breast-cancer.data",
+        breast_cancer,
+        "breast cancer",
         positive_label="no-recurrence-events",
         negative_label="recurrence-events",
+    )
+
+    evaluate_on_dataset(
+        breast_cancer_no_missing_values,
+        "breast cancer without missing values",
+        positive_label="no-recurrence-events",
+        negative_label="recurrence-events",
+    )
+
+    evaluate_on_dataset(
+        breast_cancer,
+        "breast cancer",
+        positive_label="no-recurrence-events",
+        negative_label="recurrence-events",
+        split_ratio=0.4
     )
 
 
