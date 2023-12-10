@@ -48,18 +48,20 @@ def most_common_element(elements: list[T]) -> T:
 @dataclass
 class Node:
     children: dict[str, 'Node']
-    label: str | None
+    leaf_label: str | None
+    most_common_label: str  # fallback for intermediate nodes with no corresponding children
     split_attribute_idx: int | None
 
     def is_leaf(self) -> bool:
-        return self.label is not None
+        return self.leaf_label is not None
 
     @classmethod
     def leaf(cls, label: str) -> 'Node':
         return cls(
             children={},
-            label=label,
-            split_attribute_idx=None
+            leaf_label=label,
+            most_common_label=label,
+            split_attribute_idx=None,
         )
 
 
@@ -80,9 +82,12 @@ class DecisionTreeClassifier:
         node = self._root
         while not node.is_leaf():
             attribute_value = row_attributes[node.split_attribute_idx]
+            if attribute_value not in node.children:
+                return node.most_common_label
+
             node = node.children[attribute_value]
 
-        return node.label
+        return node.leaf_label
 
     def predict(self, attributes: list[RowAttributes]) -> list[Label]:
         """Predict label based on attributes for each row"""
@@ -115,6 +120,7 @@ def build_decision_tree(
         most_common_label = most_common_element(training_set.labels)
         return Node.leaf(most_common_label)
 
+    most_common_label = most_common_element(training_set.labels)
     split_attribute_idx = best_split_idx(training_set, unused_attribute_idxs)
     dataset_partition = training_set.split_by_attribute(split_attribute_idx)
     unused_attribute_idxs.remove(split_attribute_idx)
@@ -128,6 +134,7 @@ def build_decision_tree(
 
     return Node(
         children=children,
-        label=None,
+        leaf_label=None,
+        most_common_label=most_common_label,
         split_attribute_idx=split_attribute_idx
     )

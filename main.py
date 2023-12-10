@@ -22,7 +22,7 @@ def evaluate_on_breast_cancer_dataset():
 
 def main():
     evaluate_on_mushroom_dataset()
-    evaluate_on_breast_cancer_dataset()  # TODO: KeyError on predictions
+    evaluate_on_breast_cancer_dataset()
 
 
 if __name__ == '__main__':
