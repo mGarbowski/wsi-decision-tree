@@ -46,6 +46,27 @@ def most_common_element(elements: list[T]) -> T:
 
 
 @dataclass
+class Evaluation:
+    true_positives: int = 0
+    true_negatives: int = 0
+    false_positives: int = 0
+    false_negatives: int = 0
+
+    def recall(self) -> float:
+        return self.true_positives / (self.true_positives + self.false_negatives)
+
+    def specificity(self) -> float:
+        return self.true_negatives / (self.false_positives + self.true_negatives)
+
+    def precision(self) -> float:
+        return self.true_positives / (self.true_positives + self.false_positives)
+
+    def accuracy(self) -> float:
+        return (self.true_positives + self.true_negatives) / (
+                self.true_positives + self.true_negatives + self.false_positives + self.false_negatives)
+
+
+@dataclass
 class Node:
     children: dict[str, 'Node']
     leaf_label: str | None
@@ -93,16 +114,24 @@ class DecisionTreeClassifier:
         """Predict label based on attributes for each row"""
         return [self.predict_single(row_attributes) for row_attributes in attributes]
 
-    def evaluate(self, test_set: Dataset) -> float:
+    def evaluate(self, test_set: Dataset, positive_label: str, negative_label: str) -> Evaluation:
         """Ratio of correct predictions to all predictions"""
-        actual = test_set.labels
-        predicted = self.predict(test_set.attributes)
-        correct_predictions = 0
-        for a, p in zip(actual, predicted):
-            if a == p:
-                correct_predictions += 1
+        actual_labels = test_set.labels
+        predicted_labels = self.predict(test_set.attributes)
+        evaluation = Evaluation()
+        for a, p in zip(actual_labels, predicted_labels):
+            if a == positive_label and p == positive_label:
+                evaluation.true_positives += 1
+            elif a == negative_label and p == negative_label:
+                evaluation.true_negatives += 1
+            elif a == positive_label and p == negative_label:
+                evaluation.false_negatives += 1
+            elif a == negative_label and p == positive_label:
+                evaluation.false_positives += 1
+            else:
+                raise ValueError("Labels are not binary")
 
-        return correct_predictions / len(actual)
+        return evaluation
 
 
 def build_decision_tree(
