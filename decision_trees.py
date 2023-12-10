@@ -122,19 +122,19 @@ def most_common_element(elements: list[T]) -> T:
 
 @dataclass
 class Node:
-    children: list['Node']
-    split_attribute_value: str | None
+    children: dict[str, 'Node']
     label: str | None
+    split_attribute_idx: int | None
 
     def is_leaf(self) -> bool:
         return self.label is not None
 
     @classmethod
-    def leaf(cls, label: str, split_attribute_value: str) -> 'Node':
+    def leaf(cls, label: str) -> 'Node':
         return cls(
-            children=[],
-            split_attribute_value=split_attribute_value,
-            label=label
+            children={},
+            label=label,
+            split_attribute_idx=None
         )
 
 
@@ -147,46 +147,38 @@ class DecisionTreeClassifier:
     @classmethod
     def train(cls, dataset: Dataset) -> 'DecisionTreeClassifier':
         attribute_idxs = set(range(len(dataset.attributes[0])))
-        root = build_decision_tree(dataset, attribute_idxs, None)
+        root = build_decision_tree(dataset, attribute_idxs)
         return cls(root)
 
 
 def build_decision_tree(
         training_set: Dataset,
         unused_attribute_idxs: set[int],
-        split_attribute_value: str | None
 ) -> Node:
     if training_set.is_empty():
         raise ValueError("Training set cannot be empty")
 
     _, final_label = training_set[0]
     if all(label == final_label for label in training_set.classes):
-        return Node.leaf(
-            split_attribute_value=split_attribute_value,
-            label=final_label
-        )
+        return Node.leaf(final_label)
 
     if len(unused_attribute_idxs) == 0:
         most_common_label = most_common_element(training_set.classes)
-        return Node.leaf(
-            split_attribute_value=split_attribute_value,
-            label=most_common_label
-        )
+        return Node.leaf(most_common_label)
 
     split_attribute_idx = best_split_idx(training_set, unused_attribute_idxs)
     dataset_partition = training_set.split_by_attribute(split_attribute_idx)
     unused_attribute_idxs.remove(split_attribute_idx)
-    children = [
-        build_decision_tree(
+    children = {
+        partitioned_set.attributes[0][split_attribute_idx]: build_decision_tree(
             training_set=partitioned_set,
             unused_attribute_idxs=unused_attribute_idxs.copy(),  # pass down a copy of a mutable set
-            split_attribute_value=partitioned_set.attributes[0][split_attribute_idx]  # all must be the same
         )
         for partitioned_set in dataset_partition
-    ]
+    }
 
     return Node(
         children=children,
-        split_attribute_value=split_attribute_value,
-        label=None
+        label=None,
+        split_attribute_idx=split_attribute_idx
     )
