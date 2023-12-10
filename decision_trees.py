@@ -8,13 +8,10 @@ T = TypeVar('T')
 
 
 def entropy(dataset: Dataset) -> float:
-    unique_labels = set(dataset.labels)
-    entropy_value = 0
-    for unique_label in unique_labels:
-        label_frequency = dataset.labels.count(unique_label) / dataset.size()
-        entropy_value -= label_frequency * math.log(label_frequency, 2)
-
-    return entropy_value
+    return sum(
+        - (label_frequency := dataset.labels.count(unique_label) / dataset.size()) * math.log(label_frequency, 2)
+        for unique_label in set(dataset.labels)
+    )
 
 
 def entropy_after_split(dataset: Dataset, split_attribute_idx: int) -> float:
