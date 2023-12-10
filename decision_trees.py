@@ -1,3 +1,6 @@
+import math
+
+
 class Dataset:
     """Represents a dataset
 
@@ -25,6 +28,9 @@ class Dataset:
     def classes(self) -> list[str]:
         return self._classes
 
+    def size(self):
+        return len(self._attributes)
+
 
 def load_dataset(file_path: str, class_idx: int = 0) -> Dataset:
     with open(file_path, mode="rt", encoding="utf-8") as file:
@@ -39,3 +45,13 @@ def load_dataset(file_path: str, class_idx: int = 0) -> Dataset:
             classes.append(cls)
 
         return Dataset(attributes, classes)
+
+
+def entropy(dataset: Dataset) -> float:
+    unique_classes = set(dataset.classes)
+    entropy = 0
+    for unique_class in unique_classes:
+        class_frequency = dataset.classes.count(unique_class) / dataset.size()
+        entropy -= class_frequency * math.log(class_frequency, 2)
+
+    return entropy
