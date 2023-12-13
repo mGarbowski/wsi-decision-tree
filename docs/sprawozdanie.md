@@ -91,3 +91,8 @@ ale w zbiorze są pogrupowane w przedziały i traktowane jako kategorie (np. 20-
 Hipoteza: można znaleźć lepsze punkty podziału.
 
 Nie ma możliwości łatwego sprawdzenia tej hipotezy, ponieważ pierwotne wartości liczbowe nie są podane w zbiorze.
+
+## Wnioski
+Sprawdzane hipotezy nie wyjaśniają rozbieżności w skuteczności klasyfikatora między badanymi zbiorami danych.
+Wyniki uzyskane przez mój model na zbiorze breast cancer są zbliżone do dolnych granic widełek dokładności podanych na diagramie
+na stronie https://archive.ics.uci.edu/dataset/14/breast+cancer dla klasyfikatorów opartych o zbliżony działaniem model lasu losowego
